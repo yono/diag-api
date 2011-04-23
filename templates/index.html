@@ -1,0 +1,13 @@
+<!doctype html>
+<head>
+<title>blockdiag API</title>
+</head>
+<body>
+<h1>blockdiag API</h1>
+<form method="POST" action="/blockdiag">
+  <textarea name="aaa" rows="10" cols="40">{{ data }}</textarea>
+  <input type="submit" value="send">
+</form>
+<img src="{{url_for('static', filename=outfile)}}"/>
+</body>
+
