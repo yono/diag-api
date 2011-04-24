@@ -15,7 +15,7 @@ from flask import url_for
 app = Flask(__name__)
 
 @app.route("/api/blockdiag", methods=['POST'])
-def api_blockdiag():
+def api_blockdiag_post():
     if 'src' in request.form:
         data = request.form['src']
     else:
@@ -35,9 +35,32 @@ def api_blockdiag():
     draw.draw()
     draw.save()
 
-    response = app.make_response(render_template('result.xml', url=url_for('static', filename=outfile)))
+    response = app.make_response(render_template('result.xml', url=url_for('static', filename=outfile), diag_id=unixtime))
     response.headers['Content-Type'] = 'application/xml'
     return response
+
+@app.route("/api/blockdiag/<int:diag_id>", methods=['PUT'])
+def api_blockdiag(diag_id):
+    outfile = 'blockdiag%d.png' % (diag_id)
+    if 'src' in request.form:
+        data = request.form['src']
+    else:
+        response = app.make_response(render_template('result.xml',url=url_for('static', filename=outfile), diag_id=diag_id))
+        response.headers['Content-Type'] = 'application/xml'
+        return response
+
+    tree = bd.diagparser.parse(bd.diagparser.tokenize(data))
+    diagram = bd.blockdiag.ScreenNodeBuilder.build(tree)
+    draw = bd.DiagramDraw.DiagramDraw('PNG',diagram,'static/%s' % (outfile),
+            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
+
+    draw.draw()
+    draw.save()
+
+    response = app.make_response(render_template('result.xml', url=url_for('static', filename=outfile), diag_id=diag_id))
+    response.headers['Content-Type'] = 'application/xml'
+    return response
+    
 
 @app.route("/blockdiag-tmp", methods=['GET'])
 def show_blockdiag_tmp():

@@ -5,7 +5,11 @@
   <meta charset="UTF-8">
   <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.2.min.js"></script>
   <script type="text/javascript">
+    function getUnixTime() {
+      return parseInt((new Date/1000));
+    }
     $(function(){
+      var diag_id = '';
       $.post(
         '/api/{{diag}}',
         {
@@ -16,25 +20,25 @@
           if (url != "None") {
             $("#result").attr("src", url);
           }
+          diag_id = $(data).find("id").text();
         },
         "xml"
       );
 
       $("#src").live("keyup", function(){
-        $.post(
-          '/api/{{diag}}',
-          {
-            "src": $('#src').val()
-          },
-          function(data, status) {
+        $.ajax({
+          "url": '/api/{{diag}}/' + diag_id,
+          "data": { "src": $('#src').val() },
+          "type": "PUT",
+          "cache": false,
+          "success": function(data, status) {
             var url = $(data).find("url").text();
             if (url != "None") {
-              $("#result").attr("src", url);
+              $("#result").attr("src", url + '?' + getUnixTime());
             }
-          },
-          "xml"
-        )
-      });
+          }
+          });
+        });
     });
   </script>
 </head>
