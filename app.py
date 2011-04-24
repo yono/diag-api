@@ -39,6 +39,21 @@ def api_blockdiag():
     response.headers['Content-Type'] = 'application/xml'
     return response
 
+@app.route("/blockdiag-tmp", methods=['GET'])
+def show_blockdiag_tmp():
+    data = u"""
+{
+  a -> b -> c [style=dashed];
+  b -> d -> e;
+  a [style = dotted];
+  b [color = pink];
+  c [color = "#999999"];
+  d [numbered = 20];
+  e [label = "ゴール"];
+}
+    """;
+    return render_template('index-copy.html', data=data, diag="blockdiag")
+
 @app.route("/blockdiag", methods=['POST', 'GET'])
 def show_blockdiag():
     if 'aaa' in request.form:
