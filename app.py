@@ -7,13 +7,37 @@ import time
 import blockdiag as bd
 import seqdiag.command as sd
 import actdiag as ad
-import netdiag as nd
 
 from flask import Flask
 from flask import request
 from flask import render_template
 from flask import url_for
 app = Flask(__name__)
+
+@app.route("/api/blockdiag", methods=['POST'])
+def api_blockdiag():
+    if 'src' in request.form:
+        data = request.form['src']
+    else:
+        response = app.make_response(render_template('result.xml',url='None'))
+        response.headers['Content-Type'] = 'application/xml'
+        return response
+
+    unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
+    outfile = 'blockdiag%d.png' % (unixtime)
+
+
+    tree = bd.diagparser.parse(bd.diagparser.tokenize(data))
+    diagram = bd.blockdiag.ScreenNodeBuilder.build(tree)
+    draw = bd.DiagramDraw.DiagramDraw('PNG',diagram,'static/%s' % (outfile),
+            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
+
+    draw.draw()
+    draw.save()
+
+    response = app.make_response(render_template('result.xml', url=url_for('static', filename=outfile)))
+    response.headers['Content-Type'] = 'application/xml'
+    return response
 
 @app.route("/blockdiag", methods=['POST', 'GET'])
 def show_blockdiag():
@@ -103,45 +127,6 @@ diagram {
     return render_template('index.html', data=data, outfile=outfile, 
                            diag="actdiag")
 
-@app.route("/netdiag", methods=['POST', 'GET'])
-def show_netdiag():
-    if 'aaa' in request.form:
-        data = request.form['aaa']
-    else:
-        data = u"""
-diagram {
-  network dmz {
-      address = "210.x.x.x/24"
-
-      web01 [address = "210.x.x.1"];
-      web02 [address = "210.x.x.2"];
-      web03 [address = "210.x.x.3"];
-  }
-  network internal {
-      address = "172.x.x.x/24";
-
-      db01;
-      db02;
-      app01;
-      app02;
-  }
-
-  dmz -- internal
-}
-        """;
-
-    unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
-    outfile = 'netdiag%d.png' % (unixtime)
-
-    tree = nd.diagparser.parse(nd.diagparser.tokenize(data))
-    diagram = nd.netdiag.ScreenNodeBuilder.build(tree)
-    draw = nd.DiagramDraw.DiagramDraw('PNG', diagram, 'static/%s' % (outfile),font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
-
-    draw.draw()
-    draw.save()
-
-    return render_template('index.html', data=data, outfile=outfile, 
-                           diag="netdiag")
 
 if __name__ == "__main__":
     app.debug = True
