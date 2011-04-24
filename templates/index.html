@@ -3,6 +3,44 @@
 <head>
   <title>{{diag}} API</title>
   <meta charset="UTF-8">
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.2.min.js"></script>
+  <script type="text/javascript">
+    function getUnixTime() {
+      return parseInt((new Date/1000));
+    }
+    $(function(){
+      var diag_id = '';
+      $.post(
+        '/api/{{diag}}',
+        {
+          "src": $('#src').val()
+        },
+        function(data, status) {
+          var url = $(data).find("url").text();
+          if (url != "None") {
+            $("#result").attr("src", url);
+          }
+          diag_id = $(data).find("id").text();
+        },
+        "xml"
+      );
+
+      $("#src").live("keyup", function(){
+        $.ajax({
+          "url": '/api/{{diag}}/' + diag_id,
+          "data": { "src": $('#src').val() },
+          "type": "PUT",
+          "cache": false,
+          "success": function(data, status) {
+            var url = $(data).find("url").text();
+            if (url != "None") {
+              $("#result").attr("src", url + '?' + getUnixTime());
+            }
+          }
+          });
+        });
+    });
+  </script>
 </head>
 <body>
   <header>
@@ -15,11 +53,8 @@
   </header>
   <section>
   <article>
-  <form method="POST" action="/{{diag}}">
-    <textarea name="aaa" rows="10" cols="40">{{ data }}</textarea>
-    <input type="submit" value="send">
-  </form>
-  <img src="{{url_for('static', filename=outfile)}}"/>
+  <textarea id="src" name="src" rows="10" cols="40">{{ data }}</textarea>
+  <img id="result" src=""/>
   </article>
   </section>
   </body>
