@@ -7,6 +7,7 @@ import os
 
 import blockdiag as bd
 import seqdiag.command as sd
+import seqdiag.elements as sd_elements
 import actdiag as ad
 
 from flask import Flask
@@ -34,6 +35,9 @@ def none_result():
     return response
 
 def create_blockdiag(data, outfile):
+    bd.elements.DiagramNode.clear()
+    bd.elements.DiagramEdge.clear()
+    bd.elements.NodeGroup.clear()
     tree = bd.diagparser.parse(bd.diagparser.tokenize(data))
     diagram = bd.blockdiag.ScreenNodeBuilder.build(tree)
     draw = bd.DiagramDraw.DiagramDraw('PNG',diagram,'static/%s' % (outfile),
@@ -88,6 +92,9 @@ def show_blockdiag():
     return render_template('index.html', data=data, diag="blockdiag")
 
 def create_seqdiag(data, filename):
+    sd_elements.DiagramNode.clear()
+    sd_elements.DiagramEdge.clear()
+    sd_elements.NodeGroup.clear()
     tree = sd.diagparser.parse(sd.diagparser.tokenize(data))
     diagram = sd.ScreenNodeBuilder.build(tree)
     draw = sd.DiagramDraw('PNG', diagram, 'static/%s' % (filename),
@@ -136,6 +143,9 @@ def api_seqdiag(diag_id):
         return delete_result()
 
 def create_actdiag(data, outfile):
+    ad.elements.DiagramNode.clear()
+    ad.elements.DiagramEdge.clear()
+    ad.elements.NodeGroup.clear()
     tree = ad.diagparser.parse(ad.diagparser.tokenize(data))
     diagram = ad.actdiag.ScreenNodeBuilder.build(tree)
     draw = ad.DiagramDraw.DiagramDraw('PNG', diagram, 
