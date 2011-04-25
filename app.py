@@ -9,6 +9,7 @@ import blockdiag as bd
 import seqdiag.command as sd
 import seqdiag.elements as sd_elements
 import actdiag as ad
+import netdiag as nd
 
 from flask import Flask
 from flask import request
@@ -198,6 +199,61 @@ def api_actdiag(diag_id):
         os.remove('static/%s' % (outfile))
         return delete_result()
 
+def create_netdiag(data, outfile):
+    nd.elements.DiagramNode.clear()
+    nd.elements.DiagramEdge.clear()
+    nd.elements.NodeGroup.clear()
+    tree = nd.diagparser.parse(nd.diagparser.tokenize(data))
+    diagram = nd.netdiag.ScreenNodeBuilder.build(tree)
+    draw = nd.DiagramDraw.DiagramDraw('PNG', diagram, 
+            'static/%s' % (outfile),
+            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
+
+    draw.draw()
+    draw.save()
+
+@app.route("/netdiag", methods=['GET'])
+def show_netdiag():
+    data = u"""
+diagram {
+  network dmz {
+    address = "210.x.x.x/24" web01; web02;
+  }
+  network internal {
+    address = "172.x.x.x/24" db01; db02;
+  }
+  dmz -- internal;
+}
+    """;
+    return render_template('index.html', data=data, diag="netdiag")
+
+@app.route("/api/netdiag", methods=['POST'])
+def api_netdiag_post():
+    if 'src' in request.form:
+        data = request.form['src']
+    else:
+        return none_result()
+
+    unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
+    outfile = 'netdiag%d.png' % (unixtime)
+
+    create_netdiag(data, outfile)
+
+    return create_result(outfile, unixtime)
+
+@app.route("/api/netdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
+def api_netdiag(diag_id):
+    outfile = 'netdiag%d.png' % (diag_id)
+
+    if 'PUT' == request.method:
+        if 'src' in request.form:
+            data = request.form['src']
+            create_netdiag(data, outfile)
+
+        return create_result(outfile, diag_id)
+    elif 'DELETE' == request.method:
+        os.remove('static/%s' % (outfile))
+        return delete_result()
 
 if __name__ == "__main__":
     app.debug = True

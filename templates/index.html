@@ -45,15 +45,17 @@
 <body>
   <header>
     <nav>
-    {% if diag == "blockdiag" %}blockdiag{%else%}<a href="/blockdiag">blockdiag</a>{% endif %}|
-    {% if diag == "seqdiag" %}seqdiag{%else%}<a href="/seqdiag">seqdiag</a>{% endif %}|
-    {% if diag == "actdiag" %}actdiag{%else%}<a href="/actdiag">actdiag</a>{% endif %}
+    {% if diag == "blockdiag" %}blockdiag{%else%}<a href="/blockdiag">blockdiag</a>{% endif %} |
+    {% if diag == "seqdiag" %}seqdiag{%else%}<a href="/seqdiag">seqdiag</a>{% endif %} |
+    {% if diag == "actdiag" %}actdiag{%else%}<a href="/actdiag">actdiag</a>{% endif %} |
+    {% if diag == "netdiag" %}netdiag{%else%}<a href="/netdiag">netdiag</a>{% endif %}
     </nav>
     <h1>{{diag}} API</h1>
   </header>
   <section>
   <article>
   <textarea id="src" name="src" rows="10" cols="40">{{ data }}</textarea>
+  <br/>
   <img id="result" src=""/>
   </article>
   </section>
