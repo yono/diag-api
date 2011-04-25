@@ -36,17 +36,23 @@ def none_result():
     return response
 
 def create_blockdiag(data, outfile):
-    bd.elements.DiagramNode.clear()
-    bd.elements.DiagramEdge.clear()
-    bd.elements.NodeGroup.clear()
-    tree = bd.diagparser.parse(bd.diagparser.tokenize(data))
-    diagram = bd.blockdiag.ScreenNodeBuilder.build(tree)
-    draw = bd.DiagramDraw.DiagramDraw('PNG',diagram,'static/%s' % (outfile),
-            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
+    try:
+        bd.elements.DiagramNode.clear()
+        bd.elements.DiagramEdge.clear()
+        bd.elements.NodeGroup.clear()
+        tree = bd.diagparser.parse(bd.diagparser.tokenize(data))
+        diagram = bd.blockdiag.ScreenNodeBuilder.build(tree)
+        draw = bd.DiagramDraw.DiagramDraw('PNG',diagram,
+                'static/%s' % (outfile),
+                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                antialias=True)
 
-    draw.draw()
-    draw.save()
-
+        draw.draw()
+        draw.save()
+        return True
+    except Exception, e:
+        return False
+    
 
 @app.route("/api/blockdiag", methods=['POST'])
 def api_blockdiag_post():
@@ -58,9 +64,10 @@ def api_blockdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'blockdiag%d.png' % (unixtime)
 
-    create_blockdiag(data, outfile)
-
-    return create_result(outfile, unixtime)
+    if create_blockdiag(data, outfile):
+        return create_result(outfile, unixtime)
+    else:
+        return none_result()
 
 @app.route("/api/blockdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_blockdiag(diag_id):
@@ -69,10 +76,10 @@ def api_blockdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            create_blockdiag(data, outfile)
-
-        return create_result(outfile, diag_id)
-
+            if create_blockdiag(data, outfile):
+                return create_result(outfile, diag_id)
+            else:
+                return none_result()
     elif 'DELETE' == request.method:
         os.remove('static/%s' % (outfile))
         return delete_result()
@@ -98,15 +105,20 @@ def show_blockdiag():
     return render_template('index.html', data=data, diag="blockdiag")
 
 def create_seqdiag(data, filename):
-    sd_elements.DiagramNode.clear()
-    sd_elements.DiagramEdge.clear()
-    sd_elements.NodeGroup.clear()
-    tree = sd.diagparser.parse(sd.diagparser.tokenize(data))
-    diagram = sd.ScreenNodeBuilder.build(tree)
-    draw = sd.DiagramDraw('PNG', diagram, 'static/%s' % (filename),
-            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
-    draw.draw()
-    draw.save()
+    try:
+        sd_elements.DiagramNode.clear()
+        sd_elements.DiagramEdge.clear()
+        sd_elements.NodeGroup.clear()
+        tree = sd.diagparser.parse(sd.diagparser.tokenize(data))
+        diagram = sd.ScreenNodeBuilder.build(tree)
+        draw = sd.DiagramDraw('PNG', diagram, 'static/%s' % (filename),
+                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                antialias=True)
+        draw.draw()
+        draw.save()
+        return True
+    except Exception, e:
+        return False
 
 @app.route("/seqdiag", methods=['GET'])
 def show_seqdiag():
@@ -129,9 +141,10 @@ def api_seqdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'seqdiag%d.png' % (unixtime)
 
-    create_seqdiag(data, outfile)
-
-    return create_result(outfile, unixtime)
+    if create_seqdiag(data, outfile):
+        return create_result(outfile, unixtime)
+    else:
+        return none_result()
 
 @app.route("/api/seqdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_seqdiag(diag_id):
@@ -140,26 +153,30 @@ def api_seqdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            create_seqdiag(data, outfile)
-
-        return create_result(outfile, diag_id)
-
+            if create_seqdiag(data, outfile):
+                return create_result(outfile, diag_id)
+            else:
+                return none_result()
     elif 'DELETE' == request.method:
         os.remove('static/%s' % (outfile))
         return delete_result()
 
 def create_actdiag(data, outfile):
-    ad.elements.DiagramNode.clear()
-    ad.elements.DiagramEdge.clear()
-    ad.elements.NodeGroup.clear()
-    tree = ad.diagparser.parse(ad.diagparser.tokenize(data))
-    diagram = ad.actdiag.ScreenNodeBuilder.build(tree)
-    draw = ad.DiagramDraw.DiagramDraw('PNG', diagram, 
-            'static/%s' % (outfile),
-            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
-
-    draw.draw()
-    draw.save()
+    try:
+        ad.elements.DiagramNode.clear()
+        ad.elements.DiagramEdge.clear()
+        ad.elements.NodeGroup.clear()
+        tree = ad.diagparser.parse(ad.diagparser.tokenize(data))
+        diagram = ad.actdiag.ScreenNodeBuilder.build(tree)
+        draw = ad.DiagramDraw.DiagramDraw('PNG', diagram, 
+                'static/%s' % (outfile),
+                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                antialias=True)
+        draw.draw()
+        draw.save()
+        return True
+    except Exception, e:
+        return False
 
 @app.route("/actdiag", methods=['GET'])
 def show_actdiag():
@@ -186,9 +203,10 @@ def api_actdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'actdiag%d.png' % (unixtime)
 
-    create_actdiag(data, outfile)
-
-    return create_result(outfile, unixtime)
+    if create_actdiag(data, outfile):
+        return create_result(outfile, unixtime)
+    else:
+        return none_result()
 
 @app.route("/api/actdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_actdiag(diag_id):
@@ -197,25 +215,31 @@ def api_actdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            create_actdiag(data, outfile)
-
-        return create_result(outfile, diag_id)
+            if create_actdiag(data, outfile):
+                return create_result(outfile, diag_id)
+            else:
+                return none_result()
     elif 'DELETE' == request.method:
         os.remove('static/%s' % (outfile))
         return delete_result()
 
 def create_netdiag(data, outfile):
-    nd.elements.DiagramNode.clear()
-    nd.elements.DiagramEdge.clear()
-    nd.elements.NodeGroup.clear()
-    tree = nd.diagparser.parse(nd.diagparser.tokenize(data))
-    diagram = nd.netdiag.ScreenNodeBuilder.build(tree)
-    draw = nd.DiagramDraw.DiagramDraw('PNG', diagram, 
-            'static/%s' % (outfile),
-            font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', antialias=True)
+    try:
+        nd.elements.DiagramNode.clear()
+        nd.elements.DiagramEdge.clear()
+        nd.elements.NodeGroup.clear()
+        tree = nd.diagparser.parse(nd.diagparser.tokenize(data))
+        diagram = nd.netdiag.ScreenNodeBuilder.build(tree)
+        draw = nd.DiagramDraw.DiagramDraw('PNG', diagram, 
+                'static/%s' % (outfile),
+                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                antialias=True)
 
-    draw.draw()
-    draw.save()
+        draw.draw()
+        draw.save()
+        return True
+    except Exception, e:
+        return False
 
 @app.route("/netdiag", methods=['GET'])
 def show_netdiag():
@@ -242,9 +266,10 @@ def api_netdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'netdiag%d.png' % (unixtime)
 
-    create_netdiag(data, outfile)
-
-    return create_result(outfile, unixtime)
+    if create_netdiag(data, outfile):
+        return create_result(outfile, unixtime)
+    else:
+        return none_result()
 
 @app.route("/api/netdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_netdiag(diag_id):
@@ -253,9 +278,10 @@ def api_netdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            create_netdiag(data, outfile)
-
-        return create_result(outfile, diag_id)
+            if create_netdiag(data, outfile):
+                return create_result(outfile, diag_id)
+            else:
+                return none_result()
     elif 'DELETE' == request.method:
         os.remove('static/%s' % (outfile))
         return delete_result()
