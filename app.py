@@ -82,12 +82,17 @@ def show_blockdiag():
     data = u"""
 {
   a -> b -> c [style=dashed];
-  b -> d -> e;
+       b -> d -> e;
   a [style = dotted];
   b [color = pink];
   c [color = "#999999"];
   d [numbered = 20];
   e [label = "ゴール"];
+  group {
+    color=yellow;
+    label="テスト";
+    c; d; e;
+  }
 }
     """;
     return render_template('index.html', data=data, diag="blockdiag")
