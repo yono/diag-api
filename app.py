@@ -35,23 +35,45 @@ def none_result():
     response.headers['Content-Type'] = 'application/xml'
     return response
 
-def create_blockdiag(data, outfile):
-    try:
-        bd.elements.DiagramNode.clear()
-        bd.elements.DiagramEdge.clear()
-        bd.elements.NodeGroup.clear()
-        tree = bd.diagparser.parse(bd.diagparser.tokenize(data))
-        diagram = bd.blockdiag.ScreenNodeBuilder.build(tree)
-        draw = bd.DiagramDraw.DiagramDraw('PNG',diagram,
-                'static/%s' % (outfile),
-                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
-                antialias=True)
+def create_diag_image(diagtype, diagsrc, outfile):
+    diags = {'blockdiag': [bd, bd.blockdiag],
+             'seqdiag': [sd, ''],
+             'actdiag': [ad, ad.actdiag],
+             'netdiag': [nd, nd.netdiag]}
 
-        draw.draw()
-        draw.save()
-        return True
-    except Exception, e:
-        return False
+    if diagtype == 'seqdiag':
+        try:
+            sd_elements.DiagramNode.clear()
+            sd_elements.DiagramEdge.clear()
+            sd_elements.NodeGroup.clear()
+            tree = sd.diagparser.parse(sd.diagparser.tokenize(diagsrc))
+            diagram = sd.ScreenNodeBuilder.build(tree)
+            draw = sd.DiagramDraw('PNG', diagram, 'static/%s' % (outfile),
+                    font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                    antialias=True)
+            draw.draw()
+            draw.save()
+            return True
+        except Exception, e:
+            return False
+    else:
+        diag, diagobj = diags[diagtype]
+        try:
+            diag.elements.DiagramNode.clear()
+            diag.elements.DiagramEdge.clear()
+            diag.elements.NodeGroup.clear()
+            tree = diag.diagparser.parse(diag.diagparser.tokenize(diagsrc))
+            diagram = diagobj.ScreenNodeBuilder.build(tree)
+            draw = diag.DiagramDraw.DiagramDraw('PNG',diagram,
+                    'static/%s' % (outfile),
+                    font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                    antialias=True)
+
+            draw.draw()
+            draw.save()
+            return True
+        except Exception, e:
+            return False
     
 
 @app.route("/api/blockdiag", methods=['POST'])
@@ -64,7 +86,8 @@ def api_blockdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'blockdiag%d.png' % (unixtime)
 
-    if create_blockdiag(data, outfile):
+    #if create_blockdiag(data, outfile):
+    if create_diag_image('blockdiag', data, outfile):
         return create_result(outfile, unixtime)
     else:
         return none_result()
@@ -76,7 +99,8 @@ def api_blockdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            if create_blockdiag(data, outfile):
+            #if create_blockdiag(data, outfile):
+            if create_diag_image('blockdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
                 return none_result()
@@ -104,22 +128,6 @@ def show_blockdiag():
     """;
     return render_template('index.html', data=data, diag="blockdiag")
 
-def create_seqdiag(data, filename):
-    try:
-        sd_elements.DiagramNode.clear()
-        sd_elements.DiagramEdge.clear()
-        sd_elements.NodeGroup.clear()
-        tree = sd.diagparser.parse(sd.diagparser.tokenize(data))
-        diagram = sd.ScreenNodeBuilder.build(tree)
-        draw = sd.DiagramDraw('PNG', diagram, 'static/%s' % (filename),
-                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
-                antialias=True)
-        draw.draw()
-        draw.save()
-        return True
-    except Exception, e:
-        return False
-
 @app.route("/seqdiag", methods=['GET'])
 def show_seqdiag():
     data = u"""
@@ -141,7 +149,8 @@ def api_seqdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'seqdiag%d.png' % (unixtime)
 
-    if create_seqdiag(data, outfile):
+    #if create_seqdiag(data, outfile):
+    if create_diag_image('seqdiag', data, outfile):
         return create_result(outfile, unixtime)
     else:
         return none_result()
@@ -153,7 +162,8 @@ def api_seqdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            if create_seqdiag(data, outfile):
+            #if create_seqdiag(data, outfile):
+            if create_diag_image('seqdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
                 return none_result()
@@ -161,22 +171,6 @@ def api_seqdiag(diag_id):
         os.remove('static/%s' % (outfile))
         return delete_result()
 
-def create_actdiag(data, outfile):
-    try:
-        ad.elements.DiagramNode.clear()
-        ad.elements.DiagramEdge.clear()
-        ad.elements.NodeGroup.clear()
-        tree = ad.diagparser.parse(ad.diagparser.tokenize(data))
-        diagram = ad.actdiag.ScreenNodeBuilder.build(tree)
-        draw = ad.DiagramDraw.DiagramDraw('PNG', diagram, 
-                'static/%s' % (outfile),
-                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
-                antialias=True)
-        draw.draw()
-        draw.save()
-        return True
-    except Exception, e:
-        return False
 
 @app.route("/actdiag", methods=['GET'])
 def show_actdiag():
@@ -203,7 +197,8 @@ def api_actdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'actdiag%d.png' % (unixtime)
 
-    if create_actdiag(data, outfile):
+    #if create_actdiag(data, outfile):
+    if create_diag_image('actdiag', data, outfile):
         return create_result(outfile, unixtime)
     else:
         return none_result()
@@ -215,7 +210,7 @@ def api_actdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            if create_actdiag(data, outfile):
+            if create_diag_image('actdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
                 return none_result()
@@ -223,23 +218,6 @@ def api_actdiag(diag_id):
         os.remove('static/%s' % (outfile))
         return delete_result()
 
-def create_netdiag(data, outfile):
-    try:
-        nd.elements.DiagramNode.clear()
-        nd.elements.DiagramEdge.clear()
-        nd.elements.NodeGroup.clear()
-        tree = nd.diagparser.parse(nd.diagparser.tokenize(data))
-        diagram = nd.netdiag.ScreenNodeBuilder.build(tree)
-        draw = nd.DiagramDraw.DiagramDraw('PNG', diagram, 
-                'static/%s' % (outfile),
-                font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
-                antialias=True)
-
-        draw.draw()
-        draw.save()
-        return True
-    except Exception, e:
-        return False
 
 @app.route("/netdiag", methods=['GET'])
 def show_netdiag():
@@ -266,7 +244,8 @@ def api_netdiag_post():
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
     outfile = 'netdiag%d.png' % (unixtime)
 
-    if create_netdiag(data, outfile):
+    #if create_netdiag(data, outfile):
+    if create_diag_image('netdiag', data, outfile):
         return create_result(outfile, unixtime)
     else:
         return none_result()
@@ -278,7 +257,8 @@ def api_netdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            if create_netdiag(data, outfile):
+            #if create_netdiag(data, outfile):
+            if create_diag_image('netdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
                 return none_result()
