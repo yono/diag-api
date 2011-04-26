@@ -74,23 +74,22 @@ def create_diag_image(diagtype, diagsrc, outfile):
             return True
         except Exception, e:
             return False
-    
 
-@app.route("/api/blockdiag", methods=['POST'])
-def api_blockdiag_post():
+@app.route("/api/<string:diag>", methods=['POST'])
+def api_diag_post(diag):
     if 'src' in request.form:
         data = request.form['src']
     else:
         return none_result()
 
     unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
-    outfile = 'blockdiag%d.png' % (unixtime)
+    outfile = '%s%d.png' % (diag, unixtime)
 
-    #if create_blockdiag(data, outfile):
-    if create_diag_image('blockdiag', data, outfile):
+    if create_diag_image(diag, data, outfile):
         return create_result(outfile, unixtime)
     else:
         return none_result()
+    
 
 @app.route("/api/blockdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_blockdiag(diag_id):
@@ -99,7 +98,6 @@ def api_blockdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            #if create_blockdiag(data, outfile):
             if create_diag_image('blockdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
@@ -139,21 +137,6 @@ def show_seqdiag():
     """;
     return render_template('index.html', data=data, diag="seqdiag")
 
-@app.route("/api/seqdiag", methods=['POST'])
-def api_seqdiag_post():
-    if 'src' in request.form:
-        data = request.form['src']
-    else:
-        return none_result()
-
-    unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
-    outfile = 'seqdiag%d.png' % (unixtime)
-
-    #if create_seqdiag(data, outfile):
-    if create_diag_image('seqdiag', data, outfile):
-        return create_result(outfile, unixtime)
-    else:
-        return none_result()
 
 @app.route("/api/seqdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_seqdiag(diag_id):
@@ -162,7 +145,6 @@ def api_seqdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            #if create_seqdiag(data, outfile):
             if create_diag_image('seqdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
@@ -187,21 +169,6 @@ diagram {
     """;
     return render_template('index.html', data=data, diag="actdiag")
 
-@app.route("/api/actdiag", methods=['POST'])
-def api_actdiag_post():
-    if 'src' in request.form:
-        data = request.form['src']
-    else:
-        return none_result()
-
-    unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
-    outfile = 'actdiag%d.png' % (unixtime)
-
-    #if create_actdiag(data, outfile):
-    if create_diag_image('actdiag', data, outfile):
-        return create_result(outfile, unixtime)
-    else:
-        return none_result()
 
 @app.route("/api/actdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_actdiag(diag_id):
@@ -234,21 +201,6 @@ diagram {
     """;
     return render_template('index.html', data=data, diag="netdiag")
 
-@app.route("/api/netdiag", methods=['POST'])
-def api_netdiag_post():
-    if 'src' in request.form:
-        data = request.form['src']
-    else:
-        return none_result()
-
-    unixtime = int(time.mktime(datetime.datetime.now().timetuple()))
-    outfile = 'netdiag%d.png' % (unixtime)
-
-    #if create_netdiag(data, outfile):
-    if create_diag_image('netdiag', data, outfile):
-        return create_result(outfile, unixtime)
-    else:
-        return none_result()
 
 @app.route("/api/netdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
 def api_netdiag(diag_id):
@@ -257,7 +209,6 @@ def api_netdiag(diag_id):
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            #if create_netdiag(data, outfile):
             if create_diag_image('netdiag', data, outfile):
                 return create_result(outfile, diag_id)
             else:
