@@ -17,6 +17,8 @@ from flask import render_template
 from flask import url_for
 app = Flask(__name__)
 
+font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf'
+
 def create_result(filename, diag_id):
     response = app.make_response(render_template('result.xml',
                                 url=url_for('static', filename=filename),
@@ -49,7 +51,7 @@ def create_diag_image(diagtype, diagsrc, outfile):
             tree = sd.diagparser.parse(sd.diagparser.tokenize(diagsrc))
             diagram = sd.ScreenNodeBuilder.build(tree)
             draw = sd.DiagramDraw('PNG', diagram, 'static/%s' % (outfile),
-                    font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                    font=font, 
                     antialias=True)
             draw.draw()
             draw.save()
@@ -66,7 +68,7 @@ def create_diag_image(diagtype, diagsrc, outfile):
             diagram = diagobj.ScreenNodeBuilder.build(tree)
             draw = diag.DiagramDraw.DiagramDraw('PNG',diagram,
                     'static/%s' % (outfile),
-                    font='/Library/Fonts/ヒラギノ明朝 Pro W3.otf', 
+                    font=font, 
                     antialias=True)
 
             draw.draw()
@@ -90,15 +92,14 @@ def api_diag_post(diag):
     else:
         return none_result()
     
-
-@app.route("/api/blockdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
-def api_blockdiag(diag_id):
-    outfile = 'blockdiag%d.png' % (diag_id)
+@app.route("/api/<string:diag>/<int:diag_id>", methods=['PUT', 'DELETE'])
+def api_diag(diag, diag_id):
+    outfile = '%s%d.png' % (diag, diag_id)
 
     if 'PUT' == request.method:
         if 'src' in request.form:
             data = request.form['src']
-            if create_diag_image('blockdiag', data, outfile):
+            if create_diag_image(diag, data, outfile):
                 return create_result(outfile, diag_id)
             else:
                 return none_result()
@@ -137,23 +138,6 @@ def show_seqdiag():
     """;
     return render_template('index.html', data=data, diag="seqdiag")
 
-
-@app.route("/api/seqdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
-def api_seqdiag(diag_id):
-    outfile = 'seqdiag%d.png' % (diag_id)
-
-    if 'PUT' == request.method:
-        if 'src' in request.form:
-            data = request.form['src']
-            if create_diag_image('seqdiag', data, outfile):
-                return create_result(outfile, diag_id)
-            else:
-                return none_result()
-    elif 'DELETE' == request.method:
-        os.remove('static/%s' % (outfile))
-        return delete_result()
-
-
 @app.route("/actdiag", methods=['GET'])
 def show_actdiag():
     data = u"""
@@ -168,22 +152,6 @@ diagram {
 }
     """;
     return render_template('index.html', data=data, diag="actdiag")
-
-
-@app.route("/api/actdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
-def api_actdiag(diag_id):
-    outfile = 'actdiag%d.png' % (diag_id)
-
-    if 'PUT' == request.method:
-        if 'src' in request.form:
-            data = request.form['src']
-            if create_diag_image('actdiag', data, outfile):
-                return create_result(outfile, diag_id)
-            else:
-                return none_result()
-    elif 'DELETE' == request.method:
-        os.remove('static/%s' % (outfile))
-        return delete_result()
 
 
 @app.route("/netdiag", methods=['GET'])
@@ -201,21 +169,6 @@ diagram {
     """;
     return render_template('index.html', data=data, diag="netdiag")
 
-
-@app.route("/api/netdiag/<int:diag_id>", methods=['PUT', 'DELETE'])
-def api_netdiag(diag_id):
-    outfile = 'netdiag%d.png' % (diag_id)
-
-    if 'PUT' == request.method:
-        if 'src' in request.form:
-            data = request.form['src']
-            if create_diag_image('netdiag', data, outfile):
-                return create_result(outfile, diag_id)
-            else:
-                return none_result()
-    elif 'DELETE' == request.method:
-        os.remove('static/%s' % (outfile))
-        return delete_result()
 
 if __name__ == "__main__":
     app.debug = True
