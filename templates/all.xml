@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagrams>
+{% for diag in diags %}
+<diagram>
+<url>{{diag.2}}</url>
+<id>{{diag.0}}</id>
+<diagtype>{{diag.3}}</diagtype>
+</diagram>
+{% endfor %}
+</diagrams>

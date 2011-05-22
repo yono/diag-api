@@ -13,15 +13,14 @@
 
     $(function(){
       var diag_id = '';
-      $.post(
-        '/api/{{diag}}',
-        {
-          "src": $('#src').val()
-        },
+      $.get(
+        '/api/{{diag}}/{{diag_id}}',
+        {},
         function(data, status) {
           var url = $(data).find("url").text();
           if (url != "None") {
             $("#result").attr("src", url);
+            $("#src").text($(data).find('src').text());
           }
           diag_id = $(data).find("id").text();
         },
@@ -59,7 +58,7 @@
   </header>
   <section>
   <article>
-  <textarea id="src" name="src" rows="10" cols="40">{{ data }}</textarea>
+  <textarea id="src" name="src" rows="10" cols="40"></textarea>
   <br/>
   <img id="result" src=""/>
   </article>

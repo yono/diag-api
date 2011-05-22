@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <title>diag API</title>
+  <meta charset="UTF-8">
+  <style type="text/css">
+    li.diag {
+      list-style: none;
+    }
+    li.diag img {
+      height: 100px;
+    }
+  </style>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.2.min.js"></script>
+  <script type="text/javascript">
+    $(function(){
+      $.get(
+        '/api/{{diag}}',
+        {},
+        function(data, status) {
+          $.each($(data).find('diagram'), function(){
+            $('#diaglist')
+            .append('<li class="diag"><a href="'+$(this).find('diagtype').text()+'/'+$(this).find('id').text()+'"><img src="static/'+$(this).find('url').text()+'"/></a></li>');
+          });
+        },
+        "xml"
+      );
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <nav>
+    <a href="/blockdiag">blockdiag</a> |
+    <a href="/seqdiag">seqdiag</a> |
+    <a href="/actdiag">actdiag</a> |
+    <a href="/nwdiag">nwdiag</a>
+    </nav>
+    <h1>{{diag}} API</h1>
+  </header>
+  <section>
+  <article>
+    <a href="/{{diag}}/new">CREATE</a>
+    <ul id="diaglist">
+    </ul>
+  </article>
+  </section>
+  </body>
+</html>
